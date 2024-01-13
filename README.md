@@ -1,4 +1,4 @@
-# coincap
+# CryptoCoin 
 
 A new Flutter project.
 
