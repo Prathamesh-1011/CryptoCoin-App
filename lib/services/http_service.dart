@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field
+// ignore_for_file: unused_field, avoid_print, no_leading_underscores_for_local_identifiers, non_constant_identifier_names, body_might_complete_normally_nullable
 
 import 'package:dio/dio.dart';
 import '../models/app_config.dart';
