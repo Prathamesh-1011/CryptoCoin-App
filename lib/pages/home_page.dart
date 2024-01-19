@@ -1,4 +1,6 @@
 // ignore_for_file: prefer_const_constructors
+import 'dart:convert';
+
 import 'package:coincap/services/http_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -17,7 +19,8 @@ class _HomePageState extends State<HomePage> {
 
   HTTPService? _http;
 
-  void initstate() {
+  @override
+  void initState() {
     super.initState();
     _http = GetIt.instance.get<HTTPService>();
   }
@@ -35,6 +38,7 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _selectedCoinDropdown(),
+              _dataWidgets(),
             ],
           ),
         ),
@@ -73,6 +77,48 @@ class _HomePageState extends State<HomePage> {
       icon: const Icon(
         Icons.arrow_drop_down_sharp,
         color: Colors.white,
+      ),
+    );
+  }
+
+  Widget _dataWidgets() {
+    return FutureBuilder(
+      future: _http!.get("/coins/bitcoin"),
+      builder: (
+        BuildContext _context,
+        AsyncSnapshot _snapshot,
+      ) {
+        if (_snapshot.hasData) {
+          Map _data = jsonDecode(
+            _snapshot.data.toString(),
+          );
+          num _usdPrice = _data["market_data"]["current_Price"];
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _currentPriceWidget(_usdPrice),
+            ],
+          );
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _currentPriceWidget(num _rate) {
+    return Text(
+      "${_rate.toStringAsFixed(2)} USD",
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 15,
+        fontWeight: FontWeight.w300,
       ),
     );
   }
