@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field, avoid_print, no_leading_underscores_for_local_identifiers, non_constant_identifier_names, body_might_complete_normally_nullable
+// ignore_for_file: non_constant_identifier_names, no_leading_underscores_for_local_identifiers, avoid_print, body_might_complete_normally_nullable
 
 import 'package:dio/dio.dart';
 import '../models/app_config.dart';
@@ -19,9 +19,9 @@ class HTTPService {
     try {
       String _url = "$_base_url$_path";
       Response _response = await dio.get(_url);
-      print(_response);
+      return _response;
     } catch (e) {
-      print("HTTPService: Unable to perform get request. ");
+      print('HTTPService: Unable to perform get request.');
       print(e);
     }
   }

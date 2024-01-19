@@ -1,6 +1,8 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'dart:convert';
 
+import 'package:coincap/pages/details_page.dart';
 import 'package:coincap/services/http_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -16,7 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   double? _deviceHeight, _deviceWidth;
-
+  String? _selectedCoin = "bitcoin";
   HTTPService? _http;
 
   @override
@@ -47,7 +49,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _selectedCoinDropdown() {
-    List<String> _coins = ["bitcoin"];
+    List<String> _coins = [
+      "bitcoin",
+      "ethereum",
+      "tether",
+      "cardano",
+      "ripple"
+    ];
     List<DropdownMenuItem<String>> _items = _coins
         .map(
           (e) => DropdownMenuItem(
@@ -64,43 +72,53 @@ class _HomePageState extends State<HomePage> {
         )
         .toList();
     return DropdownButton(
-      value: _coins.first,
+      value: _selectedCoin,
       items: _items,
-      onChanged: (_value) {},
-      dropdownColor: const Color.fromRGBO(
-        83,
-        88,
-        206,
-        1.0,
-      ),
+      onChanged: (dynamic _value) {
+        setState(() {
+          _selectedCoin = _value;
+        });
+      },
+      dropdownColor: const Color.fromRGBO(83, 88, 206, 1.0),
       iconSize: 30,
       icon: const Icon(
         Icons.arrow_drop_down_sharp,
         color: Colors.white,
       ),
+      underline: Container(),
     );
   }
 
   Widget _dataWidgets() {
     return FutureBuilder(
-      future: _http!.get("/coins/bitcoin"),
-      builder: (
-        BuildContext _context,
-        AsyncSnapshot _snapshot,
-      ) {
+      future: _http!.get("/coins/$_selectedCoin"),
+      builder: (BuildContext _context, AsyncSnapshot _snapshot) {
         if (_snapshot.hasData) {
           Map _data = jsonDecode(
             _snapshot.data.toString(),
           );
-          num _usdPrice = _data["market_data"]["current_Price"]["usd"];
+          num _usdPrice = _data["market_data"]["current_price"]["usd"];
           num _change24h = _data["market_data"]["price_change_percentage_24h"];
+          Map _exhangeRates = _data["market_data"]["current_price"];
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _coinImageWidget(
-                _data["image"]["large"],
+              GestureDetector(
+                onDoubleTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext _context) {
+                        return DetailsPage(rates: _exhangeRates);
+                      },
+                    ),
+                  );
+                },
+                child: _coinImageWidget(
+                  _data["image"]["large"],
+                ),
               ),
               _currentPriceWidget(_usdPrice),
               _percentageChangeWidget(_change24h),
@@ -125,8 +143,8 @@ class _HomePageState extends State<HomePage> {
       "${_rate.toStringAsFixed(2)} USD",
       style: const TextStyle(
         color: Colors.white,
-        fontSize: 15,
-        fontWeight: FontWeight.w300,
+        fontSize: 30,
+        fontWeight: FontWeight.w400,
       ),
     );
   }
@@ -134,7 +152,7 @@ class _HomePageState extends State<HomePage> {
   Widget _percentageChangeWidget(num _change) {
     return Text(
       "${_change.toString()} %",
-      style: TextStyle(
+      style: const TextStyle(
         color: Colors.white,
         fontSize: 15,
         fontWeight: FontWeight.w300,
